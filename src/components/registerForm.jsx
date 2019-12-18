@@ -1,20 +1,24 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import Joi from "joi-browser";
 import Form from "./common/form";
 
 class LoginForm extends Form {
   state = {
-    data: { username: "", password: "" },
+    data: { username: "", password: "", name: "" },
     errors: {}
   };
   schema = {
     username: Joi.string()
       .required()
+      .email()
       .label("Username"),
     password: Joi.string()
       .required()
-      .label("Password")
+      .min(5)
+      .label("Password"),
+    name: Joi.string()
+      .required()
+      .label("Name")
   };
 
   doSubmit = () => {
@@ -24,14 +28,12 @@ class LoginForm extends Form {
   render() {
     return (
       <div>
-        <h1>Login</h1>
+        <h1>Signup!!!</h1>
         <form onSubmit={this.handleSubmit}>
           {this.renderInput("username", "Username")}
           {this.renderInput("password", "Password", "password")}
-          {this.renderButton("Login")}
-          <Link className="btn btn-secondary mx-2" to="/register">
-            Register
-          </Link>
+          {this.renderInput("name", "Name")}
+          {this.renderButton("Register")}
         </form>
       </div>
     );
