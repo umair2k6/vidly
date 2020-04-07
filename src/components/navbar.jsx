@@ -19,7 +19,16 @@ const NavBar = ({ user }) => {
             Rentals
           </NavLink>
         </React.Fragment>
-        {!user && (
+        {user? (
+          <React.Fragment>
+            <NavLink className="nav-link" to="/profile">
+              {user.name}
+            </NavLink>
+            <NavLink className="nav-link" to="/logout">
+              Logout
+            </NavLink>
+          </React.Fragment>
+        ) : (
           <React.Fragment>
             <NavLink className="nav-link" to="/login">
               Login
@@ -30,16 +39,11 @@ const NavBar = ({ user }) => {
             </NavLink>
           </React.Fragment>
         )}
-        {user && (
-          <React.Fragment>
-            <NavLink className="nav-link" to="/profile">
-              {user.name}
-            </NavLink>
-            <NavLink className="nav-link" to="/logout">
-              Logout
+        <React.Fragment>
+            <NavLink className="nav-link" to="/twilio">
+              Twilio
             </NavLink>
           </React.Fragment>
-        )}
       </div>
     </nav>
   );

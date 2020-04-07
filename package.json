@@ -14,7 +14,8 @@
     "react-dom": "^16.9.0",
     "react-router-dom": "^4.3.1",
     "react-scripts": "^3.3.0",
-    "react-toastify": "^4.1.0"
+    "react-toastify": "^4.1.0",
+    "twilio-video": "^2.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
