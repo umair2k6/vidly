@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import Video from 'twilio-video';
-
+import axios from 'axios';
 
 
 class Twilio  extends Component {
@@ -29,6 +29,15 @@ class Twilio  extends Component {
 
   componentDidMount() {
     console.log("component mounted");
+    const url = 'http://tf-ecs-telehealth-423902183.eu-west-1.elb.amazonaws.com/api/v1/Twilio';
+    const payload = {
+      "identity": "Test",
+      "room": "testdoc"
+    }
+     axios.post(url, payload).then(results => {
+    const { identity, token } = results.data;
+    this.setState({ identity, token });
+  });
   }
 
   handleInputChange(e){
@@ -60,14 +69,15 @@ class Twilio  extends Component {
     };
 
     if (this.state.previewTracks) {
-        connectOptions.tracks = this.state.previewTracks;
+      console.log(this.state.previewTracks);
+      connectOptions.tracks = this.state.previewTracks;
     }
 
     /* 
     Connect to a room by providing the token and connection
     options that include the room name and tracks. We also show an alert if an error occurs while connecting to the room.    
     */  
-   console.log(this.localMedia);
+   console.log(this.remoteMedia.current);
    
     Video.connect(this.state.token, connectOptions).then(this.roomJoined, error => {
       alert('Could not connect to Twilio: ' + error.message);
@@ -78,6 +88,7 @@ class Twilio  extends Component {
     this.state.activeRoom.disconnect();
     this.setState({ hasJoinedRoom: false, localMediaAvailable: false });
   }
+  
   getTracks(participant) {
     return Array.from(participant.tracks.values()).filter(function (publication) {
       return publication.track;
@@ -95,6 +106,7 @@ class Twilio  extends Component {
 
   // Attach the Participant's Tracks to the DOM.
   attachParticipantTracks(participant, container) {
+    console.log("attach participant = > ", participant, container);
     var tracks = this.getTracks(participant);
     this.attachTracks(tracks, container);
   }
@@ -137,6 +149,8 @@ class Twilio  extends Component {
     // Participant joining room
     room.on('participantConnected', participant => {
       console.log("Joining: '" + participant.identity + "'");
+      var previewContainer = this.remoteMedia.current;
+      this.attachParticipantTracks(participant, previewContainer);
     });
 
     // Attach participant’s tracks to DOM when they add a track

@@ -12,6 +12,7 @@ import RegisterForm from "./components/registerForm";
 import Logout from "./components/logout";
 import ProtectedRoute from "./components/common/protectedRoute";
 import Twilio from "./components/twilio";
+import VideoChat from "./components/videoChat/VideoChat";
 import auth from "./services/authService";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
@@ -45,7 +46,7 @@ class App extends Component {
             ></Route>
             <Route path="/customers" component={Customers}></Route>
             <Route path="/rentals" component={Rentals}></Route>
-            <Route path="/twilio" component={Twilio}></Route>
+            <Route path="/twilio" component={VideoChat}></Route>
             <Route path="/not-found" component={NotFound}></Route>
             <Redirect from="/" exact to="/movies"></Redirect>
             <Redirect to="/not-found"></Redirect>
