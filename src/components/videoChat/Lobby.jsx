@@ -7,6 +7,7 @@ const Lobby = ({
   handleRoomNameChange,
   token,
   handleTokenChange,
+  isLocalhost,
   joinRoom
 }) => {
   return (
@@ -25,10 +26,12 @@ const Lobby = ({
           </div>
         </div>
       </div>
-      <div className="form-group">
-        <label>Token</label>
-        <textarea className="form-control" name="token" onChange={handleTokenChange} value={token} />
-      </div>
+      {!isLocalhost && (
+        <div className="form-group">
+          <label>Token</label>
+          <textarea className="form-control" name="token" onChange={handleTokenChange} value={token} />
+        </div>
+      )}
       <button type="button" className="btn btn-primary" onClick={joinRoom} > Join Room </button>
     </form>
   );

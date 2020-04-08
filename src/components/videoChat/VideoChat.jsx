@@ -1,12 +1,13 @@
 import React, { useState, useCallback } from 'react';
-import axios from 'axios';
 import Lobby from './Lobby';
 import Room from './Room';
 
 const VideoChat = () => {
   const [username, setUsername] = useState('');
   const [roomName, setRoomName] = useState('');
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState('');
+  // eslint-disable-next-line no-restricted-globals
+  const [isLocalhost] = useState(location.hostname === "localhost"? true : false);
 
   const handleUsernameChange = useCallback(event => {
     setUsername(event.target.value);
@@ -21,30 +22,33 @@ const VideoChat = () => {
   }, []);
 
   const joinRoom = useCallback(async event => {
-    const url = 'http://tf-ecs-telehealth-423902183.eu-west-1.elb.amazonaws.com/api/v1/Twilio';
-    const payload = JSON.stringify({
-          identity: username,
-          room: roomName
-    });
-    // const headers = {
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //     }
-    // };
-    // const data = await axios.post(url, payload, headers).then(res => res.json());
-
-
-    const data = await fetch(url, {
-      method: 'POST',
-      body: payload,
-      headers: {
-        'Content-Type': 'application/json'
+    if(localStorage.getItem('twilio')){
+      setToken(localStorage.getItem('twilio'));
+    } else {
+      // eslint-disable-next-line no-restricted-globals
+      let newToken;
+      if (isLocalhost){
+        const url = 'http://tf-ecs-telehealth-423902183.eu-west-1.elb.amazonaws.com/api/v1/Twilio';
+        const payload = JSON.stringify({
+              identity: username,
+              room: roomName
+        });
+        const data = await fetch(url, {
+          method: 'POST',
+          body: payload,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }).then(res => res.json());
+        newToken = data.token;
+      } else {
+        newToken = token;
       }
-    }).then(res => res.json());
-    console.log(data);
+      localStorage.setItem('twilio', newToken);
+      setToken(newToken);
+    }
     
-    setToken(data.token);
-  }, [roomName, username]);
+  }, [roomName, username, isLocalhost, token]);
 
   const handleLogout = useCallback(event => {
     setToken(null);
@@ -61,6 +65,7 @@ const VideoChat = () => {
          username={username}
          roomName={roomName}
          token={token}
+         isLocalhost={isLocalhost}
          handleTokenChange={handleTokenChange}
          handleUsernameChange={handleUsernameChange}
          handleRoomNameChange={handleRoomNameChange}
