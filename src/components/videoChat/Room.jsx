@@ -5,6 +5,7 @@ import Participant from './Participant';
 const Room = ({ roomName, token, handleLogout }) => {
   const [room, setRoom] = useState(null);
   const [participants, setParticipants] = useState([]);
+  const [focused, setFocused] = useState('remote');
 
   const remoteParticipants = participants.map(participant => (
     <Participant key={participant.sid} participant={participant} />
@@ -42,12 +43,29 @@ const Room = ({ roomName, token, handleLogout }) => {
     };
   }, [roomName, token]);
   
+  const toggleMute = () => {
+    var localParticipant = room.localParticipant;
+    console.log(localParticipant);
+    
+    // localParticipant.audioTracks.forEach(function (audioTrack) {
+    //   audioTrack.enable(!audioTrack.isEnabled);
+    // });
+  }
+
+  const toggleVideo = () => {
+    var localParticipant = room.localParticipant;
+    localParticipant.videoTracks.forEach(function (videoTrack) {
+    if ( videoTrack.isEnabled ) {
+            videoTrack.disable();
+    } else {
+        videoTrack.enable();
+    }
+    });
+  }
+
   return (
     <div className="room">
       <h3>Room: {roomName}</h3>
-      <div className="text-right">
-        <button className="btn btn-danger" onClick={handleLogout}>Log out</button>
-      </div>
       <div className="local-participant">
         {room ? (
           <Participant
@@ -57,8 +75,10 @@ const Room = ({ roomName, token, handleLogout }) => {
         ) : (
           ''
         )}
+        <button className="btn btn-secondary" onClick={toggleVideo}>Stop Video</button>
+        <button className="btn btn-secondary" onClick={toggleMute}>Mute</button>
+        <button className="btn btn-danger" onClick={handleLogout}>End Call</button>
       </div>
-      <h3>Remote Participants</h3>
       <div className="remote-participants">{remoteParticipants}</div>
     </div>
   );
