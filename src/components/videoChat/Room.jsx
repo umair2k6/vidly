@@ -5,6 +5,8 @@ import Participant from './Participant';
 const Room = ({ roomName, token, handleLogout }) => {
   const [room, setRoom] = useState(null);
   const [participants, setParticipants] = useState([]);
+  const [isAudioMute, setIsAudioMute] = useState(false);
+  const [isVideoPaused, setIsVideoPaused] = useState(false);
   const [focused, setFocused] = useState('remote');
 
   const remoteParticipants = participants.map(participant => (
@@ -44,22 +46,26 @@ const Room = ({ roomName, token, handleLogout }) => {
   }, [roomName, token]);
   
   const toggleMute = () => {
-    var localParticipant = room.localParticipant;
-    console.log(localParticipant);
-    
-    // localParticipant.audioTracks.forEach(function (audioTrack) {
-    //   audioTrack.enable(!audioTrack.isEnabled);
-    // });
+    const publications = room.localParticipant.audioTracks
+    publications.forEach( publication => {
+      if (isAudioMute) {
+        publication.track.enable();
+      } else {
+        publication.track.disable();
+      }
+      setIsAudioMute(!isAudioMute);
+    });       
   }
 
   const toggleVideo = () => {
-    var localParticipant = room.localParticipant;
-    localParticipant.videoTracks.forEach(function (videoTrack) {
-    if ( videoTrack.isEnabled ) {
-            videoTrack.disable();
-    } else {
-        videoTrack.enable();
-    }
+      const publications = room.localParticipant.videoTracks
+      publications.forEach( publication => {
+      if (isVideoPaused) {
+        publication.track.enable();
+      } else {
+        publication.track.disable();
+      }
+      setIsVideoPaused(!isVideoPaused);
     });
   }
 
@@ -75,8 +81,8 @@ const Room = ({ roomName, token, handleLogout }) => {
         ) : (
           ''
         )}
-        <button className="btn btn-secondary" onClick={toggleVideo}>Stop Video</button>
-        <button className="btn btn-secondary" onClick={toggleMute}>Mute</button>
+        <button className="btn btn-secondary" onClick={toggleVideo}>{isVideoPaused ? "Show Video" : "Hide Video"}</button>
+        <button className="btn btn-secondary" onClick={toggleMute}> {isAudioMute? "Unmute" : "Mute"}</button>
         <button className="btn btn-danger" onClick={handleLogout}>End Call</button>
       </div>
       <div className="remote-participants">{remoteParticipants}</div>
