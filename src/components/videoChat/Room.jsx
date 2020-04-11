@@ -7,7 +7,7 @@ const Room = ({ roomName, token, handleLogout }) => {
   const [participants, setParticipants] = useState([]);
   const [isAudioMute, setIsAudioMute] = useState(false);
   const [isVideoPaused, setIsVideoPaused] = useState(false);
-  const [focused, setFocused] = useState('remote');
+  const [videoDeviceList, setVideoDeviceList] = useState([]);
 
   const remoteParticipants = participants.map(participant => (
     <Participant key={participant.sid} participant={participant} />
@@ -15,9 +15,11 @@ const Room = ({ roomName, token, handleLogout }) => {
 
   useEffect(() => {
     const participantConnected = participant => {
+      console.log('participant connected => ', participant);
       setParticipants(prevParticipants => [...prevParticipants, participant]);
     };
     const participantDisconnected = participant => {
+      console.log('participant disconnected => ', participant);
       setParticipants(prevParticipants =>
         prevParticipants.filter(p => p !== participant)
       );
@@ -29,7 +31,11 @@ const Room = ({ roomName, token, handleLogout }) => {
       room.on('participantConnected', participantConnected);
       room.on('participantDisconnected', participantDisconnected);
       room.participants.forEach(participantConnected);
+    }, error => {
+      handleLogout();
+      console.error(`Unable to connect to Room: ${error.message}`);
     });
+
     return () => {
       setRoom(currentRoom => {
         if (currentRoom && currentRoom.localParticipant.state === 'connected') {
@@ -43,7 +49,7 @@ const Room = ({ roomName, token, handleLogout }) => {
         }
       });
     };
-  }, [roomName, token]);
+  }, [roomName, token, handleLogout]);
   
   const toggleMute = () => {
     const publications = room.localParticipant.audioTracks
@@ -69,6 +75,35 @@ const Room = ({ roomName, token, handleLogout }) => {
     });
   }
 
+  navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
+    
+    const videoDevices = mediaDevices.filter(device => device.kind === 'videoinput').map((device, index) => ({
+        deviceId: device.deviceId,
+        label: device.label,
+        isSelected : index===0? true: false
+    }));
+    setVideoDeviceList(videoDevices);
+  });
+
+  const updateVideoDevice = () => {
+    const localParticipant = room.localParticipant;
+    console.log(localParticipant);
+    
+    const selectedDevice = videoDeviceList.filter(device => !device.isSelected);
+    Video.createLocalVideoTrack({
+      deviceId: { exact: selectedDevice.deviceId }
+    }).then(localVideoTrack => {
+      console.log(localVideoTrack);
+      
+        // LocalParticipant.unpublishTrack();
+    });
+  }
+
+  const disconnect = () => {
+    room.disconnect();
+    handleLogout();
+  }
+
   return (
     <div className="room">
       <h3>Room: {roomName}</h3>
@@ -83,7 +118,8 @@ const Room = ({ roomName, token, handleLogout }) => {
         )}
         <button className="btn btn-secondary" onClick={toggleVideo}>{isVideoPaused ? "Show Video" : "Hide Video"}</button>
         <button className="btn btn-secondary" onClick={toggleMute}> {isAudioMute? "Unmute" : "Mute"}</button>
-        <button className="btn btn-danger" onClick={handleLogout}>End Call</button>
+        {videoDeviceList.length > 1 && (<button className="btn btn-danger" onClick={updateVideoDevice}>Switch Camera</button>)}
+        <button className="btn btn-danger" onClick={disconnect}>End Call</button>
       </div>
       <div className="remote-participants">{remoteParticipants}</div>
     </div>
