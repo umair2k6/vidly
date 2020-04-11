@@ -24,6 +24,7 @@ const Room = ({ roomName, token, handleLogout }) => {
         prevParticipants.filter(p => p !== participant)
       );
     };
+
     Video.connect(token, {
       name: roomName
     }).then(room => {
@@ -39,7 +40,7 @@ const Room = ({ roomName, token, handleLogout }) => {
     return () => {
       setRoom(currentRoom => {
         if (currentRoom && currentRoom.localParticipant.state === 'connected') {
-          currentRoom.localParticipant.tracks.forEach(function(trackPublication) {
+          currentRoom.localParticipant.tracks.forEach(trackPublication => {
             trackPublication.track.stop();
           });
           currentRoom.disconnect();
@@ -85,18 +86,18 @@ const Room = ({ roomName, token, handleLogout }) => {
     setVideoDeviceList(videoDevices);
   });
 
-  const updateVideoDevice = () => {
-    const localParticipant = room.localParticipant;
-    console.log(localParticipant);
-    
+  const switchCamera = async () => {
+
+    const tracks = Array.from(room.localParticipant.videoTracks.values());
+    const currentDevice = tracks.find(track => track.kind === 'video');
     const selectedDevice = videoDeviceList.filter(device => !device.isSelected);
-    Video.createLocalVideoTrack({
+    const newDevice = await Video.createLocalVideoTrack({
       deviceId: { exact: selectedDevice.deviceId }
-    }).then(localVideoTrack => {
-      console.log(localVideoTrack);
-      
-        // LocalParticipant.unpublishTrack();
     });
+
+    // Switch camera
+    room.localParticipant.unpublishTrack(currentDevice.track);
+    room.localParticipant.publishTrack(newDevice);
   }
 
   const disconnect = () => {
@@ -118,7 +119,7 @@ const Room = ({ roomName, token, handleLogout }) => {
         )}
         <button className="btn btn-secondary" onClick={toggleVideo}>{isVideoPaused ? "Show Video" : "Hide Video"}</button>
         <button className="btn btn-secondary" onClick={toggleMute}> {isAudioMute? "Unmute" : "Mute"}</button>
-        {videoDeviceList.length > 1 && (<button className="btn btn-danger" onClick={updateVideoDevice}>Switch Camera</button>)}
+        {videoDeviceList.length > 1 && (<button className="btn btn-danger" onClick={switchCamera}>Switch Camera</button>)}
         <button className="btn btn-danger" onClick={disconnect}>End Call</button>
       </div>
       <div className="remote-participants">{remoteParticipants}</div>
