@@ -63,7 +63,7 @@ const Participant = ({ participant }) => {
 
   return (
     <div className="participant">
-      <h3>{participant.identity}</h3>
+      <h3 className="participant-name">{participant.identity}</h3>
       <video ref={videoRef} autoPlay={true} />
       <audio ref={audioRef} autoPlay={true} />
       {/* <audio ref={audioRef} autoPlay={true} muted={true} /> */}

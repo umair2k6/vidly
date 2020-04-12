@@ -1,0 +1,39 @@
+.room {
+  width: 100%;
+  position: relative;
+}
+.remote-participants video{
+  width: 100%;
+  max-height: calc(100vh - 90px);
+}
+.participant-name{
+  position: absolute;
+  left: 50%;
+  top: 10px;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 24px;
+  font-weight: normal;
+}
+.local-participant{
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 150px;
+}
+.local-participant video{
+  max-width: 100%;
+}
+.local-participant .participant-name{
+  display: none;
+}
+.controls{
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.controls .btn{
+  margin-right: 5px;
+  margin-left: 5px;
+}

@@ -11,7 +11,6 @@ import LoginForm from "./components/loginForm";
 import RegisterForm from "./components/registerForm";
 import Logout from "./components/logout";
 import ProtectedRoute from "./components/common/protectedRoute";
-import Twilio from "./components/twilio";
 import VideoChat from "./components/videoChat/VideoChat";
 import auth from "./services/authService";
 import "react-toastify/dist/ReactToastify.css";

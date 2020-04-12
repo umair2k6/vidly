@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Video from 'twilio-video';
 import Participant from './Participant';
+import "./videoChat.css";
 
 const Room = ({ roomName, token, handleLogout }) => {
   const [room, setRoom] = useState(null);
@@ -76,28 +77,37 @@ const Room = ({ roomName, token, handleLogout }) => {
     });
   }
 
-  navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
-    
-    const videoDevices = mediaDevices.filter(device => device.kind === 'videoinput').map((device, index) => ({
-        deviceId: device.deviceId,
-        label: device.label,
-        isSelected : index===0? true: false
-    }));
-    setVideoDeviceList(videoDevices);
-  });
+  if(videoDeviceList.length === 0){
+    navigator.mediaDevices.enumerateDevices().then(mediaDevices => {
+      const videoDevices = mediaDevices.filter(device => device.kind === 'videoinput').map((device, index) => ({
+          deviceId: device.deviceId,
+          label: device.label,
+          isSelected : index===0? true: false
+      }));
+      setVideoDeviceList(videoDevices);
+    });
+  } 
 
   const switchCamera = async () => {
 
     const tracks = Array.from(room.localParticipant.videoTracks.values());
     const currentDevice = tracks.find(track => track.kind === 'video');
-    const selectedDevice = videoDeviceList.filter(device => !device.isSelected);
+    room.localParticipant.unpublishTrack(currentDevice.track);
+
+    const selectedDevice = videoDeviceList.filter(device => !device.isSelected)[0];
     const newDevice = await Video.createLocalVideoTrack({
       deviceId: { exact: selectedDevice.deviceId }
     });
 
     // Switch camera
-    room.localParticipant.unpublishTrack(currentDevice.track);
     room.localParticipant.publishTrack(newDevice);
+    const devices = videoDeviceList.map(device => ({
+        deviceId: device.deviceId,
+        label: device.label,
+        isSelected : !device.isSelected
+    }));
+
+    setVideoDeviceList(devices);
   }
 
   const disconnect = () => {
@@ -107,22 +117,23 @@ const Room = ({ roomName, token, handleLogout }) => {
 
   return (
     <div className="room">
-      <h3>Room: {roomName}</h3>
-      <div className="local-participant">
-        {room ? (
-          <Participant
-            key={room.localParticipant.sid}
-            participant={room.localParticipant}
-          />
-        ) : (
-          ''
-        )}
-        <button className="btn btn-secondary" onClick={toggleVideo}>{isVideoPaused ? "Show Video" : "Hide Video"}</button>
-        <button className="btn btn-secondary" onClick={toggleMute}> {isAudioMute? "Unmute" : "Mute"}</button>
-        {videoDeviceList.length > 1 && (<button className="btn btn-danger" onClick={switchCamera}>Switch Camera</button>)}
-        <button className="btn btn-danger" onClick={disconnect}>End Call</button>
-      </div>
       <div className="remote-participants">{remoteParticipants}</div>
+        {room && (
+          <React.Fragment>
+            <div className="local-participant">
+              <Participant
+                key={room.localParticipant.sid}
+                participant={room.localParticipant}
+              />
+            </div>
+            <div className="controls">
+              <button className="btn btn-primary" onClick={toggleVideo}>{isVideoPaused ? "Show Video" : "Hide Video"}</button>
+              <button className="btn btn-primary" onClick={toggleMute}> {isAudioMute? "Unmute" : "Mute"}</button>
+              {videoDeviceList.length > 1 && (<button className="btn btn-danger" onClick={switchCamera}>Switch Camera</button>)}
+              <button className="btn btn-danger" onClick={disconnect}>End Call</button>
+            </div>
+          </React.Fragment>
+        )}
     </div>
   );
 
