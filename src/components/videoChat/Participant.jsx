@@ -33,6 +33,10 @@ const Participant = ({ participant }) => {
 
     participant.on('trackSubscribed', trackSubscribed);
     participant.on('trackUnsubscribed', trackUnsubscribed);
+    participant.on("trackPublished", () => {
+      setVideoTracks(trackpubsToTracks(participant.videoTracks));
+      setAudioTracks(trackpubsToTracks(participant.audioTracks));
+    });
 
     return () => {
       setVideoTracks([]);

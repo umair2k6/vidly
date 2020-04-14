@@ -17,8 +17,8 @@
 }
 .local-participant{
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 20px;
+  right: 20px;
   width: 150px;
 }
 .local-participant video{

@@ -9,6 +9,8 @@ const Room = ({ roomName, token, handleLogout }) => {
   const [isAudioMute, setIsAudioMute] = useState(false);
   const [isVideoPaused, setIsVideoPaused] = useState(false);
   const [videoDeviceList, setVideoDeviceList] = useState([]);
+  const [shouldRender, setShouldRender] = useState(false);
+  
 
   const remoteParticipants = participants.map(participant => (
     <Participant key={participant.sid} participant={participant} />
@@ -89,26 +91,29 @@ const Room = ({ roomName, token, handleLogout }) => {
   } 
 
   const switchCamera = async () => {
-
     const tracks = Array.from(room.localParticipant.videoTracks.values());
     const currentDevice = tracks.find(track => track.kind === 'video');
     room.localParticipant.unpublishTrack(currentDevice.track);
+    currentDevice.track.stop();
 
     const selectedDevice = videoDeviceList.filter(device => !device.isSelected)[0];
     const newDevice = await Video.createLocalVideoTrack({
       deviceId: { exact: selectedDevice.deviceId }
     });
-
-    // Switch camera
     room.localParticipant.publishTrack(newDevice);
     const devices = videoDeviceList.map(device => ({
         deviceId: device.deviceId,
         label: device.label,
         isSelected : !device.isSelected
     }));
-
+    setShouldRender(!shouldRender);
     setVideoDeviceList(devices);
   }
+
+  useEffect(() => {
+    // Update the document title using the browser API
+    console.log(room);
+  });
 
   const disconnect = () => {
     room.disconnect();
@@ -124,6 +129,7 @@ const Room = ({ roomName, token, handleLogout }) => {
               <Participant
                 key={room.localParticipant.sid}
                 participant={room.localParticipant}
+                shouldRender={shouldRender}
               />
             </div>
             <div className="controls">
